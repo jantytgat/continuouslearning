@@ -1,0 +1,44 @@
+#cloud-config
+autoinstall:
+  version: 1
+  locale: en_US
+  keyboard:
+    layout: en
+    variant: us
+  source:
+    id: ubuntu-server-minimized
+  storage:
+    layout:
+      name: direct
+  identity:
+    hostname: packer-ubuntu-22-04-proxmox
+    username: ${provisioner_username}
+    password: ${provisioner_password}
+  ssh:
+    install-server: yes
+    allow-pw: yes
+    authorized-keys:
+      - ${provisioner_sshkey}
+  packages:
+    - apparmor-profiles
+    - apparmor-utils
+    - apt-transport-https
+    - ca-certificates
+    - cloud-init
+    - curl
+    - fail2ban
+    - gnupg2
+    - htop
+    - iftop
+    - net-tools
+    - ntp
+    - qemu-guest-agent
+    - screen
+    - traceroute
+  late-commands:
+      - echo 'Defaults:stager !requiretty' > /target/etc/sudoers.d/stager
+      - echo 'stager ALL=(ALL) NOPASSWD:ALL' >> /target/etc/sudoers.d/stager
+      - chmod 440 /target/etc/sudoers.d/stager
+      - curtin in-target --target=/target -- apt update           
+      - curtin in-target --target=/target -- apt upgrade -y
+      
